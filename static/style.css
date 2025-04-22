@@ -1,0 +1,140 @@
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+h1, h2 {
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 5px;
+}
+
+.container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+
+.controls, .output {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.controls {
+    flex: 1;
+    min-width: 300px; /* Ensure controls have enough space */
+}
+
+.output {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.control-group {
+    margin-bottom: 15px;
+}
+
+.control-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.control-group input[type="text"],
+.control-group input[type="number"],
+.control-group input[type="file"] {
+    width: calc(100% - 16px); /* Adjust for padding */
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Include padding in width */
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-group input[type="checkbox"] {
+    margin-right: 8px;
+}
+.checkbox-group label {
+    margin-bottom: 0; /* Override block label style */
+    font-weight: normal;
+}
+
+
+button {
+    background-color: #3498db;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.status-message {
+    margin-top: 15px;
+    color: #2c3e50;
+}
+
+.error-message {
+    margin-top: 15px;
+    color: #e74c3c;
+    font-weight: bold;
+}
+
+.plot-area {
+    border: 1px dashed #ccc;
+    min-height: 200px; /* Minimum height before image loads */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+    overflow: hidden; /* Hide potential overflow */
+    background-color: #ecf0f1;
+    flex-grow: 1; /* Allow area to grow */
+}
+
+#plotImage {
+    max-width: 100%;
+    max-height: 100%; /* Ensure image fits within the container */
+    display: block; /* Remove extra space below image */
+}
+
+#plotPlaceholder {
+    color: #95a5a6;
+}
+
+#downloadLink {
+    display: inline-block; /* Correct display for link */
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #2ecc71;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    text-align: center;
+    transition: background-color 0.3s ease;
+}
+
+#downloadLink:hover {
+    background-color: #27ae60;
+}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>csv2graph SPA (Go/WASM)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>csv2graph SPA</h1>
+    <p>CSVファイルを選択し、オプションを指定して散布図を生成します。</p>
+
+    <div class="container">
+        <div class="controls">
+            <h2>設定</h2>
+
+            <div class="control-group">
+                <label for="csvFile">CSVファイル:</label>
+                <input type="file" id="csvFile" accept=".csv">
+            </div>
+
+            <div class="control-group">
+                <label for="columns">プロットする列 (カンマ区切り):</label>
+                <input type="text" id="columns" placeholder="例: a,b,c" required>
+            </div>
+
+            <div class="control-group">
+                <label for="title">グラフタイトル:</label>
+                <input type="text" id="title" value="Scatter Plot from CSV">
+            </div>
+
+            <div class="control-group">
+                <label for="size">画像サイズ (幅x高さ):</label>
+                <input type="text" id="size" value="768x512" placeholder="例: 800x600">
+            </div>
+
+            <div class="control-group">
+                <label for="range">X軸最大値 (オプション):</label>
+                <input type="number" id="range" placeholder="指定しない場合は全データ">
+            </div>
+
+            <div class="control-group">
+                <label for="skip">データ間引き (N個ごと):</label>
+                <input type="number" id="skip" value="1" min="1">
+            </div>
+
+            <div class="control-group checkbox-group">
+                <input type="checkbox" id="xdata">
+                <label for="xdata">CSVの最初の列がX軸データ</label>
+            </div>
+
+            <div class="control-group">
+                <label for="xscale">X軸の値域マッピング (開始,終了):</label>
+                <input type="text" id="xscale" placeholder="例: 0,100 (オプション)">
+            </div>
+
+            <button id="generateBtn" disabled>グラフ生成</button>
+
+            <div id="status" class="status-message"></div>
+            <div id="error" class="error-message"></div>
+        </div>
+
+        <div class="output">
+            <h2>生成結果</h2>
+            <div class="plot-area">
+                <img id="plotImage" alt="生成されたグラフ" style="display: none;">
+                 <p id="plotPlaceholder">ここにグラフが表示されます。</p>
+            </div>
+             <a id="downloadLink" href="#" download="scatter_plot.png" style="display: none;">グラフをダウンロード</a>
+        </div>
+    </div>
+
+    <!-- WASM実行に必要なスクリプト -->
+    <script src="wasm_exec.js"></script>
+    <!-- アプリケーションロジック -->
+    <script src="script.js"></script>
+</body>
+</html>
