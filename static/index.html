@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>csv2graph SPA (Go/WASM)</title>
+    <title>csv2graph SPA (Rust/WASM)</title> <!-- タイトル変更 -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>csv2graph SPA</h1>
+    <h1>csv2graph SPA (Rust/WASM Version)</h1> <!-- タイトル変更 -->
     <p>CSVファイルを選択し、オプションを指定して散布図を生成します。</p>
 
     <div class="container">
@@ -21,7 +21,7 @@
 
             <div class="control-group">
                 <label for="columns">プロットする列 (カンマ区切り):</label>
-                <input type="text" id="columns" placeholder="例: a,b,c" required>
+                <input type="text" id="columns" placeholder="例: temp,humidity" required> <!-- プレースホルダー更新 -->
             </div>
 
             <div class="control-group">
@@ -70,9 +70,9 @@
         </div>
     </div>
 
-    <!-- WASM実行に必要なスクリプト -->
-    <script src="wasm_exec.js"></script>
-    <!-- アプリケーションロジック -->
-    <script src="script.js"></script>
+    <!-- WASM実行に必要なスクリプト (削除) -->
+    <!-- <script src="wasm_exec.js"></script> -->
+    <!-- アプリケーションロジック (type="module" を追加) -->
+    <script type="module" src="script.js"></script>
 </body>
 </html>

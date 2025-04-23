@@ -1,8 +1,10 @@
-// static/script.js (修正版)
+// static/script.js (Rust/WASM版)
+
+// WASMモジュールを非同期でインポート
+import init, { generate_plot_rust } from './csv2graph.js'; // wasm-pack が生成するファイル
 
 document.addEventListener('DOMContentLoaded', () => {
-    // === 修正箇所 ===
-    // 最初にすべてのDOM要素を取得する
+    // DOM要素の取得 (変更なし)
     const csvFileInput = document.getElementById('csvFile');
     const columnsInput = document.getElementById('columns');
     const titleInput = document.getElementById('title');
@@ -12,69 +14,46 @@ document.addEventListener('DOMContentLoaded', () => {
     const xdataCheckbox = document.getElementById('xdata');
     const xscaleInput = document.getElementById('xscale');
     const generateBtn = document.getElementById('generateBtn');
-    const statusDiv = document.getElementById('status'); // <-- statusDivをここで取得
+    const statusDiv = document.getElementById('status');
     const errorDiv = document.getElementById('error');
     const plotImage = document.getElementById('plotImage');
     const plotPlaceholder = document.getElementById('plotPlaceholder');
     const downloadLink = document.getElementById('downloadLink');
-    // ===============
 
     let csvContent = null;
-    const go = new Go();
     let wasmReady = false;
 
-    // statusDivが取得された後なので、安全に使用できる
     statusDiv.textContent = "WASMモジュールを初期化中...";
 
-    // --- Check WASM support and Initialize ---
-    if (!WebAssembly.instantiateStreaming) {
-        WebAssembly.instantiateStreaming = async (resp, importObject) => {
-            const source = await (await resp).arrayBuffer();
-            return await WebAssembly.instantiate(source, importObject);
-        };
-    }
-
-    WebAssembly.instantiateStreaming(fetch("csv2graph.wasm"), go.importObject)
-        .then((result) => {
-            console.log("WASM Module Instantiated");
-            statusDiv.textContent = "WASMインスタンス化完了。";
-
+    // --- WASM モジュールの初期化 ---
+    async function initializeWasm() {
+        try {
+            await init(); // WASMモジュールとJSグルーコードを初期化
+            console.log("WASM Module Initialized");
+            statusDiv.textContent = "WASM初期化完了。";
             wasmReady = true;
-            console.log("WASM Ready Flag set to true.");
-
             statusDiv.textContent = "準備完了。CSVファイルを選択してください。";
             checkEnableButton();
-
-            Promise.resolve(go.run(result.instance)).catch(err => {
-                 console.error("Error during go.run():", err);
-                 errorDiv.textContent = `エラー: Goランタイムの実行中にエラーが発生しました。 (${err})`;
-                 wasmReady = false;
-                 generateBtn.disabled = true;
-                 statusDiv.textContent = "WASM実行エラー";
-            });
-
-            console.log("go.run() initiated.");
-
-        })
-        .catch((err) => {
-            console.error("WASM Initialization Error during instantiation:", err);
+        } catch (err) {
+            console.error("WASM Initialization Error:", err);
             errorDiv.textContent = `エラー: WebAssemblyモジュールの初期化に失敗しました。 (${err})`;
-            statusDiv.textContent = "";
+            statusDiv.textContent = "WASM初期化エラー";
             generateBtn.disabled = true;
             wasmReady = false;
-        });
+        }
+    }
 
-    // --- Event Listeners ---
+    initializeWasm(); // 初期化を実行
+
+    // --- イベントリスナー (変更なし) ---
     csvFileInput.addEventListener('change', handleFileSelect);
     generateBtn.addEventListener('click', handleGenerateClick);
 
     function checkEnableButton() {
-        // この関数が呼ばれる時点で statusDiv と generateBtn は確実に存在する
         generateBtn.disabled = !(wasmReady && csvContent);
     }
 
     function handleFileSelect(event) {
-        // この関数が呼ばれる時点で statusDiv, errorDiv などは確実に存在する
         const file = event.target.files[0];
         if (!file) {
             csvContent = null;
@@ -85,8 +64,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const reader = new FileReader();
         reader.onload = (e) => {
             csvContent = e.target.result;
-            // statusDiv.textContent = `ファイル「${file.name}」を読み込みました。`; // メッセージは上書きしないようにコメントアウトのまま
-            errorDiv.textContent = '';
+            errorDiv.textContent = ''; // エラーメッセージをクリア
+            statusDiv.textContent = `ファイル「${file.name}」を読み込みました。`; // ステータス更新
             checkEnableButton();
         };
         reader.onerror = (e) => {
@@ -95,18 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
             csvContent = null;
             checkEnableButton();
         };
-        reader.readAsText(file);
+        reader.readAsText(file); // テキストとして読み込む
     }
 
+    // --- グラフ生成ボタンのクリックハンドラ (Rust関数呼び出しに変更) ---
     function handleGenerateClick() {
-        // この関数が呼ばれる時点で必要な要素はすべて存在する
         if (!wasmReady || !csvContent) {
             errorDiv.textContent = 'WASMが準備できていないか、CSVファイルが選択されていません。';
             return;
         }
-        if (typeof generatePlotGo !== 'function') {
-             errorDiv.textContent = 'エラー: Go側の関数(generatePlotGo)がJavaScriptから利用可能になっていません。';
-             return;
+        // generate_plot_rust関数が利用可能かチェック (init完了後に利用可能になる)
+        if (typeof generate_plot_rust !== 'function') {
+            errorDiv.textContent = 'エラー: Rust側の関数(generate_plot_rust)が利用可能になっていません。';
+            return;
         }
 
         errorDiv.textContent = '';
@@ -116,60 +96,73 @@ document.addEventListener('DOMContentLoaded', () => {
         statusDiv.textContent = 'グラフを生成中...';
         generateBtn.disabled = true;
 
+        // オプションを組み立てる (Go版と同様)
         const options = {
             columns: columnsInput.value.split(',').map(s => s.trim()).filter(s => s),
             title: titleInput.value || "Scatter Plot from CSV",
             size: sizeInput.value || "768x512",
-            maxRange: parseFloat(rangeInput.value) || 0,
-            skip: parseInt(skipInput.value) || 1,
+            // parseFloatの結果がNaNならnull、そうでなければ数値。Rust側はOption<f64>で受ける
+            maxRange: !isNaN(parseFloat(rangeInput.value)) ? parseFloat(rangeInput.value) : null,
+             // parseIntの結果がNaNなら1、そうでなければ数値 (1以上)
+            skip: Math.max(1, parseInt(skipInput.value) || 1),
             xdata: xdataCheckbox.checked,
-            xscale: xscaleInput.value.trim() || "",
+            // 空文字列ならnull、そうでなければ文字列。Rust側はOption<String>で受ける
+            xscale: xscaleInput.value.trim() || null,
         };
 
+        // 基本的なバリデーション
         if (options.columns.length === 0) {
             errorDiv.textContent = 'エラー: プロットする列を指定してください。';
             statusDiv.textContent = '';
-            generateBtn.disabled = false;
+            generateBtn.disabled = false; // 再度押せるように
             return;
         }
-        if (options.skip < 1) {
-             errorDiv.textContent = 'エラー: データ間引きは1以上である必要があります。';
-             statusDiv.textContent = '';
-             generateBtn.disabled = false;
-             return;
-        }
 
-        setTimeout(() => {
-            try {
-                console.log("Calling generatePlotGo with options:", options);
-                const result = generatePlotGo(csvContent, JSON.stringify(options));
-                console.log("Result from generatePlotGo:", result);
+        // Rust関数を非同期で呼び出す可能性があるため、setTimeoutは不要かも
+        // 直接呼び出す
+        try {
+            console.log("Calling generate_plot_rust with options:", options);
+            // Rust関数を呼び出し、結果 (JsValue) を受け取る
+            const resultJsValue = generate_plot_rust(csvContent, JSON.stringify(options));
 
-                if (result && result.error) {
-                    console.error("WASM Error:", result.error);
-                    errorDiv.textContent = `生成エラー: ${result.error}`;
-                    statusDiv.textContent = '';
-                } else if (result && result.base64Image) {
-                    const imageUrl = `data:image/png;base64,${result.base64Image}`;
-                    plotImage.src = imageUrl;
-                    plotImage.style.display = 'block';
-                    plotPlaceholder.style.display = 'none';
-                    statusDiv.textContent = 'グラフが生成されました。';
-                    downloadLink.href = imageUrl;
-                    downloadLink.style.display = 'inline-block';
-                } else {
-                    errorDiv.textContent = '予期しないエラー: WASMからの応答が不正です。';
-                    console.log("Invalid result structure:", result);
-                     statusDiv.textContent = '';
-                }
-            } catch (err) {
-                 console.error("Error calling WASM function:", err);
-                 errorDiv.textContent = `実行時エラー: ${err}`;
-                 statusDiv.textContent = '';
-            } finally {
-                 generateBtn.disabled = false;
+            // JsValue を JavaScriptオブジェクトに変換する必要はない (serde-wasm-bindgen が自動で行う)
+            // ただし、返り値が Result<JsValue, JsValue> のため、エラーチェックが必要
+            // generate_plot_rust自体がエラーを投げた場合 (JSONパース失敗など) はcatchブロックへ
+            // Rust内部のエラーは resultJsValue.error に入る想定
+
+            const result = resultJsValue; // 直接代入 (JsValueがProxyのように振る舞う)
+            console.log("Result from generate_plot_rust:", result);
+
+
+            if (result && result.error) {
+                console.error("WASM Error:", result.error);
+                errorDiv.textContent = `生成エラー: ${result.error}`;
+                statusDiv.textContent = '';
+            } else if (result && result.base64Image) {
+                const imageUrl = `data:image/png;base64,${result.base64Image}`;
+                plotImage.src = imageUrl;
+                plotImage.style.display = 'block';
+                plotPlaceholder.style.display = 'none';
+                statusDiv.textContent = 'グラフが生成されました。';
+                downloadLink.href = imageUrl;
+                downloadLink.style.display = 'inline-block';
+            } else {
+                // 予期しない成功応答 (画像もエラーもない)
+                errorDiv.textContent = '予期しないエラー: WASMからの応答が不正です (画像もエラーもありません)。';
+                console.log("Invalid result structure:", result);
+                statusDiv.textContent = '';
             }
-        }, 10);
+        } catch (err) {
+            // generate_plot_rust呼び出し自体、またはserde_wasm_bindgenでのエラー
+            console.error("Error calling WASM function or processing result:", err);
+            // エラーオブジェクトが詳細情報を持つ場合がある
+            const errorMessage = err.message || String(err);
+            errorDiv.textContent = `実行時エラー: ${errorMessage}`;
+            statusDiv.textContent = '';
+        } finally {
+            // 処理完了後、ボタンを再度有効化
+            generateBtn.disabled = false;
+        }
 
     } // handleGenerateClick end
 }); // DOMContentLoaded end
