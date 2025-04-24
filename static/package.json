@@ -1,0 +1,15 @@
+{
+  "name": "csv2graph_core",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "csv2graph_bg.wasm",
+    "csv2graph.js",
+    "csv2graph.d.ts"
+  ],
+  "main": "csv2graph.js",
+  "types": "csv2graph.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

@@ -1,0 +1,5 @@
+# .cargo/config.toml
+
+[target.wasm32-unknown-unknown]
+# wasm32-unknown-unknown ターゲットに対してバルクメモリ機能を無効にする
+rustflags = ["-C", "target-feature=-bulk-memory"]
