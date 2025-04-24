@@ -1,7 +1,5 @@
-# rust/Cargo.toml (修正版: default-features = false を削除)
-
 [package]
-name = "csv2graph_core"
+name    = "csv2graph_core"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,21 +7,25 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-# --- plotters の default-features = false を削除 ---
-plotters = { version = "0.3.3", features = ["ttf", "bitmap_backend", "point_series"] } # default-features = false を削除
-# --- 修正ここまで ---
-plotters-bitmap = { version = "0.3.7", default-features = false } # こちらは false のままで良いはず
-base64 = "0.21"
-image = { version = "0.24", default-features = false, features = ["png", "bmp"] }
-console_error_panic_hook = { version = "0.1.7", optional = true }
-serde-wasm-bindgen = "0.6"
-once_cell = "1"
-ttf-parser = "0.15" # ttf feature が依存
-csv = "1.3"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0"
+# ── 基盤 ────────────────────────────────────
 wasm-bindgen = "0.2"
-web-sys = { version = "0.3", features = ["console"] } # Optional: ログ出力用
+
+# ── 画像 & 描画 ─────────────────────────────
+image       = { version = "0.25", default-features = false, features = ["png"] }
+imageproc   = { version = "0.25", default-features = false } # rayon 無効
+
+# ── フォント（imageproc と同じ ab_glyph 系） ─
+ab_glyph    = "0.2"
+
+# ── CSV / JSON / base64 ─────────────────────
+csv                = "1.3"
+serde              = { version = "1.0", features = ["derive"] }
+serde_json         = "1.0"
+serde-wasm-bindgen = "0.6"
+base64             = "0.21"
+
+# ── 便利 ────────────────────────────────────
+console_error_panic_hook = { version = "0.1", optional = true }
 
 [features]
 default = ["console_error_panic_hook"]
