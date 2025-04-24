@@ -2,6 +2,7 @@
 
 CSVファイルからインタラクティブに散布図を生成するWebアプリケーションです。Go言語とWebAssembly (WASM) を利用して実装されています。
 - Rust/WASM version は [こちら](https://github.com/ryogrid/csv2graph-go-wasm/tree/rust-version)
+- CLIツール（Go, Python）は [こちら](https://github.com/ryogrid/csv2graph)
 
 ![SPA Screenshot](./screenshot.png)
 
