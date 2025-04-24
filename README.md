@@ -2,7 +2,7 @@
 
 CSV ファイルから **グリッド・折れ線・凡例付きの散布図** を生成する Web アプリケーションです。  
 描画ロジックは Rust で実装され、 WebAssembly (WASM) と `wasm‑bindgen` でブラウザに組み込みます。
-- [deployed page](https://ryogrid.github.io/csv2graph-go-wasm/)
+- [hosted site](https://ryogrid.github.io/csv2graph-go-wasm/)
 
 ![SPA Screenshot](./screenshot.png)
 
