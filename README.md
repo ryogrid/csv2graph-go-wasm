@@ -60,7 +60,7 @@ wasm-pack build --target web --out-dir ../static --out-name csv2graph
 
 ## 使い方
 
-1. `docs/` を任意の HTTP サーバーで公開  
+1. `static/` を任意の HTTP サーバーで公開  
    ```bash
    python3 -m http.server --directory static 8080
    ```  
