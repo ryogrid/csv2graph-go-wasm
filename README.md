@@ -1,6 +1,7 @@
 # csv2graph SPA (Go/WASM Version)
 
 CSVファイルからインタラクティブに散布図を生成するWebアプリケーションです。Go言語とWebAssembly (WASM) を利用して実装されています。
+- Rust/WASM version は [こちら](https://github.com/ryogrid/csv2graph-go-wasm/tree/rust-version)
 
 ![SPA Screenshot](./screenshot.png)
 
