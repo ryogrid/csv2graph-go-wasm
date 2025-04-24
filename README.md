@@ -54,14 +54,14 @@ cargo install wasm-pack
 ```bash
 # 3. ビルド (static/ 以下に出力)
 cd rust
-wasm-pack build --target web --out-dir ../static --out-name csv2graph
+wasm-pack build --target web --out-dir ../docs --out-name csv2graph
 ```
 
 ## 使い方
 
-1. `static/` を任意の HTTP サーバーで公開  
+1. `docs/` を任意の HTTP サーバーで公開  
    ```bash
-   python3 -m http.server --directory static 8080
+   python3 -m http.server --directory docs 8080
    ```  
 2. ブラウザで `http://localhost:8080` を開く  
 3. CSV を選択しオプションを設定 → **グラフ生成**  
